@@ -38,11 +38,11 @@ func New(etcdErrWriter io.Writer) (*Harness, error) {
 	s := &Harness{errWriter: etcdErrWriter}
 	endpointAddress, err := allocateLocalAddress()
 	if err != nil {
-		return nil, fmt.Errorf("failed allocating server addr: %v", err)
+		return nil, fmt.Errorf("failed allocating endpoint addr: %v", err)
 	}
 	peerAddress, err := allocateLocalAddress()
 	if err != nil {
-		return nil, fmt.Errorf("failed allocating server addr: %v", err)
+		return nil, fmt.Errorf("failed allocating peer addr: %v", err)
 	}
 	etcdBinary, err := exec.LookPath("etcd")
 	if err != nil {
@@ -69,22 +69,23 @@ func New(etcdErrWriter io.Writer) (*Harness, error) {
 	s.Endpoint = endpoint
 	if err := s.etcdServer.Start(); err != nil {
 		s.Stop()
-		return nil, fmt.Errorf("cannot start etcd: %v", err)
+		return nil, fmt.Errorf("cannot start etcd: %v, will clean up", err)
 	}
 	s.Client, err = etcd.New(etcd.Config{Endpoints: []string{endpoint}})
 	if err != nil {
 		s.Stop()
-		return s, fmt.Errorf("failed allocating client: %v", err)
+		return s, fmt.Errorf("failed allocating client: %v, will clean up", err)
 	}
 	// Actively poll for etcd coming up for 3 seconds every 50 milliseconds.
 	for i := 0; i < 60; i++ {
-		if err := s.Client.Sync(context.Background()); err == nil {
+    ctx, _ := context.WithTimeout(context.TODO(), 10 * time.Millisecond)
+		if err := s.Client.Sync(ctx); err == nil {
 			return s, nil
 		}
 		time.Sleep(50 * time.Millisecond)
 	}
 	s.Stop()
-	return s, fmt.Errorf("failed connecting to test etcd server: %v", err)
+	return s, fmt.Errorf("failed connecting to test etcd server: %v, will clean up", err)
 }
 
 func (s *Harness) Stop() {

@@ -19,7 +19,7 @@ to leverage single startup of a test suite.
 ## Usage
 
 Harness exports the [official Golang client bindings](https://godoc.org/github.com/coreos/etcd/client) under 
- `harness.Client`. For raw access purposes `harness.Endpoint` returns
+ `harness.Client`. For raw access purposes `harness.Endpoint` returns the client-side endpoint of the etcd server.
 
 For an example of usage that utilises [testify Suites](https://godoc.org/github.com/stretchr/testify/suite), please see
 [harness_test.go](harness_test.go).
