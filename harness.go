@@ -1,6 +1,5 @@
 // Copyright 2016 Michal Witkowski. All Rights Reserved.
 // See LICENSE for licensing terms covering this software.
-
 // Package etcd_harness provides an integration test harness for running a local etcd server.
 
 package etcd_harness
@@ -18,6 +17,7 @@ import (
 	"golang.org/x/net/context"
 )
 
+// Harness represents a running etcd server for an integraiton test environment.
 type Harness struct {
 	errWriter  io.Writer
 	etcdServer *exec.Cmd
@@ -76,18 +76,32 @@ func New(etcdErrWriter io.Writer) (*Harness, error) {
 		s.Stop()
 		return s, fmt.Errorf("failed allocating client: %v, will clean up", err)
 	}
-	// Actively poll for etcd coming up for 3 seconds every 50 milliseconds.
-	for i := 0; i < 60; i++ {
-    ctx, _ := context.WithTimeout(context.TODO(), 10 * time.Millisecond)
-		if err := s.Client.Sync(ctx); err == nil {
-			return s, nil
-		}
-		time.Sleep(50 * time.Millisecond)
+	if err := s.pollEtcdForReadiness(); err != nil {
+		s.Stop()
+		return nil, fmt.Errorf("%v, will clean up", err)
 	}
-	s.Stop()
-	return s, fmt.Errorf("failed connecting to test etcd server: %v, will clean up", err)
+	return s, nil
 }
 
+func (s *Harness) pollEtcdForReadiness() error {
+	api := etcd.NewKeysAPI(s.Client)
+	// Actively poll for etcd coming up for 3 seconds every 50 milliseconds.
+	for i := 0; i < 20; i++ {
+		until := time.Now().Add(200 * time.Millisecond)
+		ctx, _:= context.WithDeadline(context.TODO(), until)
+		_, err := api.Get(ctx, "/", &etcd.GetOptions{})
+		if err == nil {
+			return nil
+		}
+		toSleep := until.Sub(time.Now())
+		if toSleep > 0 {
+			time.Sleep(toSleep)
+		}
+	}
+	return fmt.Errorf("etcd didn't come up in 4000ms")
+}
+
+// Stop kills the harnessed etcd server and cleans up the data directory.
 func (s *Harness) Stop() {
 	var err error
 	if s.etcdServer != nil {
