@@ -17,7 +17,7 @@ import (
 )
 
 type HarnessTestSuite struct {
-	suite.Suite
+
 	keys etcd.KeysAPI
 }
 

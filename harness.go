@@ -88,7 +88,7 @@ func (s *Harness) pollEtcdForReadiness() error {
 	// Actively poll for etcd coming up for 3 seconds every 50 milliseconds.
 	for i := 0; i < 20; i++ {
 		until := time.Now().Add(200 * time.Millisecond)
-		ctx, _:= context.WithDeadline(context.TODO(), until)
+		ctx, _ := context.WithDeadline(context.TODO(), until)
 		_, err := api.Get(ctx, "/", &etcd.GetOptions{})
 		if err == nil {
 			return nil
