@@ -3,8 +3,8 @@
 
 [![Travis Build](https://travis-ci.org/mwitkow/go-etcd-harness.svg)](https://travis-ci.org/mwitkow/go-etcd-harness)
 [![Go Report Card](http://goreportcard.com/badge/mwitkow/go-etcd-harness)](http://goreportcard.com/report/mwitkow/go-etcd-harness)
-[![GoDoc](http://img.shields.io/badge/GoDoc-Reference-blue.svg)](https://godoc.org/mwitkow/go-etcd-harness)
-[![MIT License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://godoc.org/mwitkow/go-etcd-harness/blob/master/LICENSE)
+[![GoDoc](http://img.shields.io/badge/GoDoc-Reference-blue.svg)](https://godoc.org/github.com/mwitkow/go-etcd-harness)
+[![MIT License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 Harness code that spins up and manages a local-only [etcd](https://github.com/coreos/etcd) server for Go (golang) 
 integration tests.
